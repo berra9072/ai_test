@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--  -->
+<mapper namespace="Admin">
+
+	<select id="getAdminInfo" parameterType="AdminVO" resultType="AdminVO">
+		SELECT
+			MEMBER_ID
+			, PASSWD
+			, MEMBER_NAME
+			, GROUP_SEQ
+			, LAST_DATE
+			, LAST_IP
+			, USE_YN
+			, TYPE
+			, INSERT_DATE
+			, ATTACH
+			, CASE
+				WHEN PW_LAST_UPDATE_DATE <![CDATA[ <]]> SYSDATE + INTERVAL '-90' DAY
+				THEN 'N'
+				ELSE 'Y'
+			END AS RULL_VALID_YN
+		FROM TB_ADMIN
+		WHERE MEMBER_ID = #{memberId}
+			AND PASSWD = #{passwd}
+			AND USE_YN = 'Y'
+	</select>
+
+	<update id="updateAdminLastLogin" parameterType="AdminVO">
+		UPDATE
+			TB_ADMIN
+		SET
+			LAST_DATE = #{sysdate}
+			, LAST_IP = #{lastIp}
+		WHERE MEMBER_ID = #{memberId}
+	</update>
+
+	<select id="listLeftMenuMain" parameterType="AdminVO" resultType="MenuVO">
+		SELECT
+			COUNT(*) OVER() AS TOTCNT
+			, D.IDX_MENU1
+			, C.IDX_MENU2
+			, D.NAME AS NAMES1
+			, C.NAME AS NAMES2
+			, C.URL AS URL
+			, B.GROUP_SEQ
+		FROM TB_ADMIN A
+			JOIN TB_ADMIN_MENU_AUTH B ON A.GROUP_SEQ = B.GROUP_SEQ
+			JOIN TB_ADMIN_MENU_2 C ON B.IDX_MENU2 = C.IDX_MENU2
+			JOIN TB_ADMIN_MENU_1 D ON C.IDX_MENU1 = D.IDX_MENU1
+		WHERE C.VERS = 'v2'
+			AND D.VERS= 'v2'
+			AND A.MEMBER_ID = #{memberId}
+		ORDER BY D.ORD, D.IDX_MENU1, C.ORD
+	</select>
+
+</mapper>

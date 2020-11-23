@@ -1,0 +1,535 @@
+<!DOCTYPE HTML>
+<!--
+/*
+ * jQuery File Upload Plugin Demo
+ * https://github.com/blueimp/jQuery-File-Upload
+ *
+ * Copyright 2010, Sebastian Tschan
+ * https://blueimp.net
+ *
+ * Licensed under the MIT license:
+ * http://www.opensource.org/licenses/MIT
+ */
+-->
+<html lang="en">
+<head>
+<link rel="stylesheet" href="/common/css/admin.css" type="text/css" />
+	<link rel="stylesheet" href="/common/css/jquery-ui.css" type="text/css" />
+	<script type="text/javascript" src="/common/js/jquery-1.8.1.min.js"></script>
+	<script type="text/javascript" src="/common/js/common.js"></script>
+	<script type="text/javascript" src="/common/js/jquery.alphanum.js"></script>
+	<script type="text/javascript" src="/common/js/jquery.placeholder.js"></script>
+	<script type="text/javascript" src="/common/js/util.js"></script>
+	<script type="text/javascript" src="/common/js/datepicker.js"></script>
+	<script type="text/javascript" src="/common/js/jquery.form.js"></script>
+	<script type="text/javascript" src="/common/js/cmCommon.js"></script>
+	<script type="text/javascript" src="/common/js/valcheck.js" charset="utf-8"></script>
+<!-- Force latest IE rendering engine or ChromeFrame if installed -->
+<!--[if IE]>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+<![endif]-->
+<meta charset="utf-8">
+<title>jQuery File Upload Demo</title>
+<meta name="description" content="File Upload widget with multiple file selection, drag&amp;drop support, progress bars, validation and preview images, audio and video for jQuery. Supports cross-domain, chunked and resumable file uploads and client-side image resizing. Works with any server-side platform (PHP, Python, Ruby on Rails, Java, Node.js, Go etc.) that supports standard HTML form file uploads.">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- Bootstrap styles -->
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css">
+<!-- Generic page styles -->
+<link rel="stylesheet" href="/uploadplugin/css/style.css">
+<!-- blueimp Gallery styles -->
+<link rel="stylesheet" href="//blueimp.github.io/Gallery/css/blueimp-gallery.min.css">
+<!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
+<link rel="stylesheet" href="/uploadplugin/css/jquery.fileupload.css">
+<link rel="stylesheet" href="/uploadplugin/css/jquery.fileupload-ui.css">
+<!-- CSS adjustments for browsers with JavaScript disabled -->
+<noscript><link rel="stylesheet" href="/uploadplugin/css/jquery.fileupload-noscript.css"></noscript>
+<noscript><link rel="stylesheet" href="/uploadplugin/css/jquery.fileupload-ui-noscript.css"></noscript>
+</head>
+<body>
+<div class="container"><!-- action="/_admin/test/ajaxRegistFile3.adm"  -->
+	<form id="fileupload"  method="POST" enctype="multipart/form-data">
+		<!-- Redirect browsers with JavaScript disabled to the origin page -->
+		<noscript><input type="hidden" name="redirect" value="https://blueimp.github.io/jQuery-File-Upload/"></noscript>
+		<!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
+		<div class="row fileupload-buttonbar">
+			<div class="col-lg-7">
+				<!-- The fileinput-button span is used to style the file input field as button -->
+				<span class="btn btn-success fileinput-button">
+					<i class="glyphicon glyphicon-plus"></i>
+					<span>Add files...</span>
+					<input type="file" name="files">
+				</span>
+				<button type="submit" class="btn btn-primary start">
+					<i class="glyphicon glyphicon-upload"></i>
+					<span>Start upload</span>
+				</button>
+				<button type="reset" class="btn btn-warning cancel">
+					<i class="glyphicon glyphicon-ban-circle"></i>
+					<span>Cancel upload</span>
+				</button>
+				<button type="button" class="btn btn-danger delete">
+					<i class="glyphicon glyphicon-trash"></i>
+					<span>Delete</span>
+				</button>
+				<input type="checkbox" class="toggle">
+				<!-- The global file processing state -->
+				<span class="fileupload-process"></span>
+			</div>
+			<!-- The global progress state -->
+			<div class="col-lg-5 fileupload-progress fade">
+				<!-- The global progress bar -->
+				<div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+					<div class="progress-bar progress-bar-success" style="width:0%;"></div>
+				</div>
+				<!-- The extended global progress state -->
+				<div class="progress-extended">&nbsp;</div>
+			</div>
+		</div>
+		<!-- The table listing the files available for upload/download -->
+		<table role="presentation" class="table table-striped"><tbody class="files"></tbody></table>
+	</form>
+	<br>
+</div>
+<!-- The blueimp Gallery widget -->
+<div id="blueimp-gallery" class="blueimp-gallery blueimp-gallery-controls" data-filter=":even">
+	<div class="slides"></div>
+	<h3 class="title"></h3>
+	<a class="prev">‹</a>
+	<a class="next">›</a>
+	<a class="close">×</a>
+	<a class="play-pause"></a>
+	<ol class="indicator"></ol>
+</div>
+<div>
+
+
+<form id="form1" name="form1"  method="post">
+<table border="0" cellpadding="0" cellspacing="0" class="tbl02">
+					<colgroup>
+						<col width="150">
+						<col width="350">
+						<col width="150">
+						<col width="*">
+					</colgroup>
+					<tbody>
+							<tr>
+								<th scope="row">CID</th>
+								<td>
+									<input type="hidden" id="cid" name="cid" value="">
+									
+								</td>
+								<th scope="row"><span class="txt_cr_r pdr5">*</span>제작사 코드</th>
+								<td class="last">
+									<input type="text" class="inpTxt" style="width:200px;" fname="제작사 코드" required="" name="production_code" id="production_code" value="" onkeyup="checkByteAlert(this,20)" readonly="readonly">
+									<span class="btn_gray"><a href="#submit" onclick="ajaxCallApi()">조회</a></span>
+								</td>
+							</tr>
+							<tr>
+								<th scope="row"><span class="txt_cr_r pdr5">*</span>컨텐츠명</th> 
+								<td>
+									<input type="text" class="inpTxt" style="width:95%;" fname="컨텐츠명" required="" name="content_name" id="content_name" value="" onkeyup="checkByteAlert(this,100)">
+								</td>
+								<th scope="row"><span class="txt_cr_r pdr5">*</span>제작사명</th>
+								<td class="last">
+									<input type="text" class="inpTxt" style="width:95%;" fname="제작사명" required="" name="production_name" id="production_name" value="" onkeyup="checkByteAlert(this,50)" readonly="readonly">
+								</td>
+							</tr>
+						<tr>
+							<th scope="row"><span class="txt_cr_r pdr5">*</span>경로 및<br>　입수 파일명</th>
+							<td style="vertical-align: middle;">
+								
+									
+										<input type="text" class="inpTxt" style="width:95%;" fname="경로 및 입수 파일명" required="" name="org_file_name" id="org_file_name" onkeyup="checkByteAlert(this,200)" value="">
+									
+									
+								
+							</td>
+							<th scope="row">상품코드</th>
+							<td class="last" style="vertical-align: middle;">
+								<input type="text" class="inpTxt inp_num" style="width:100px;" fname="상품코드" name="product_code" id="product_code" maxlength="8" onkeyup="checkByteAlert(this,50)" value="">
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">파일명</th>
+							<td>
+								
+							</td>
+							<th scope="row"><span class="txt_cr_r pdr5">*</span>BANDWIDTH</th>
+							<td class="last">
+								<input type="text" class="inpTxt" style="width:100px;" fname="BANDWIDTH" required="" name="band_width" id="band_width" onkeyup="checkByteAlert(this,10)" value="">
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><span class="txt_cr_r pdr5">*</span>해상도</th>
+							<td>
+								<select id="audioCodec" name="resolution" style="width: 150px;" fname="해상도" required="">
+									<option value="" selected="selected">선택</option>
+									
+										<option value="1080p">1080p</option>
+									
+										<option value="1080i">1080i</option>
+									
+										<option value="720p">720p</option>
+									
+										<option value="480p">480p</option>
+									
+										<option value="480i">480i</option>
+									
+								</select>
+							</td>
+							<th scope="row"><span class="txt_cr_r pdr5">*</span>방송시간</th>
+							<td class="last">
+								<input type="text" class="inpTxt inp_num" style="width:70px;" fname="방송 시간" required="" name="play_time" id="play_time" onkeyup="checkByteAlert(this,10)" value="">&nbsp;초
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><span class="txt_cr_r pdr5">*</span>Video codec</th>
+							<td>
+								<select id="videoCodec" name="video_codec" style="width: 150px;" fname="Video codec" required="">
+									<option value="" selected="selected">선택</option>
+									
+										<option value="MPEG-2">MPEG-2</option>
+									
+										<option value="H.264">H.264</option>
+									
+								</select>
+							</td>
+							<th scope="row"><span class="txt_cr_r pdr5">*</span>파일 사이즈</th>
+							<td class="last">
+								<input type="text" class="inpTxt inp_num" style="width:70px;" fname="파일 사이즈" required="" name="file_size" id="file_size" onkeyup="checkByteAlert(this,30)" value="">&nbsp;MB
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><span class="txt_cr_r pdr5">*</span>Audio codec</th>
+							<td>
+								<select id="videoCodec" name="audio_codec" style="width: 150px;" fname="Audio codec" required="">
+									<option value="" selected="selected">선택</option>
+									
+										<option value="MPEG-2">MPEG-2</option>
+									
+										<option value="AC-3">AC-3</option>
+									
+								</select>
+							</td>
+							<th scope="row"><span class="txt_cr_r pdr5">*</span>유효 시작일</th>
+							<td class="last">
+								<input type="text" class="datePicker hasDatepicker" style="width:70px;" name="use_start_date" id="use_start_date" maxlength="10" readonly="" required="" value="" fname="유효 시작 일">
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><span class="txt_cr_r pdr5">*</span>파일 Type</th>
+							<td>
+								<select id="fileType" name="file_type" style="width: 150px;" fname="파일 Type" required="">
+									<option value="" selected="selected">선택</option>
+									
+										<option value="MPEG-2 TS">MPEG-2 TS</option>
+									
+										<option value="MPEG-2 PS">MPEG-2 PS</option>
+									
+								</select>
+							</td>
+							<th scope="row"><span class="txt_cr_r pdr5">*</span>유효 종료일</th>
+							<td class="last">
+								<input type="text" class="datePicker hasDatepicker" style="width:70px;" name="use_end_date" id="use_end_date" maxlength="10" readonly="" required="" value="2999-12-31" fname="유효 종료 일">
+							</td>
+						</tr>
+						<tr>
+							<th scope="row"><span class="txt_cr_r pdr5">*</span>사용여부</th>
+							<td>
+								<input type="radio" name="use_yn" value="Y" checked="checked"> Y
+								&nbsp;&nbsp;&nbsp;
+								<input type="radio" name="use_yn" value="N"> N
+							</td>
+							<th scope="row"><span class="txt_cr_r pdr5">*</span>검수여부</th>
+							<td class="last">
+								<input type="radio" name="test_yn" value="Y" checked="checked"> Y
+								&nbsp;&nbsp;&nbsp;
+								<input type="radio" name="test_yn" value="N"> N
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">Sample 경로 및<br>입수 파일명</th>
+							<td style="vertical-align: middle;">
+								
+									
+										<input type="text" class="inpTxt" style="width:95%;" fname="Sample 경로 및 입수 파일명" name="sample_org_file_name" id="sample_org_file_name" onkeyup="checkByteAlert(this,200)" value="">
+									
+									
+								
+							</td>
+							<th scope="row"><span class="txt_cr_r pdr5">*</span>폐기여부</th>
+							<td class="last" style="vertical-align: middle;">
+								<input type="radio" name="del_yn" value="Y"> Y
+								&nbsp;&nbsp;&nbsp;
+								<input type="radio" name="del_yn" value="N" checked="checked"> N
+							</td>
+						</tr>
+						<tr>
+							<th scope="row">Sample 파일명</th>
+							<td>
+								
+							</td>
+							<th scope="row">원본 CID</th>
+							<td class="last">
+								<input type="text" class="inpTxt" style="width:200px;" fname="원본 CID" name="org_cid" id="org_cid" onkeyup="checkByteAlert(this,20)" value="" readonly="readonly">
+								<span class="btn_gray"><a href="#submit" onclick="goContentSearch()">조회</a></span>
+							</td>
+						</tr>
+					</tbody>
+					</table>
+					<div class="btn_right mgt30" style="text-align:center;">
+							<span class="btn_red"><a href="#submit" onclick="goInsert()">등록</a></span>
+							<a href="javascript:jsonParam();" >jsonParam()</a>
+					</div>
+					</form>
+</div>
+<!-- The template to display files available for upload -->
+<script id="template-upload" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+	<tr class="template-upload fade">
+		<td>
+			<span class="preview"></span>
+		</td>
+		<td>
+			<p id="file_id_{%=file.file_id%}" class="name" data-file-id="{%=file.file_id%}">{%=file.name%} {%=file.file_id%}</p>
+			<strong class="error text-danger"></strong>
+		</td>
+		<td>
+			<p class="size">Processing...</p>
+			<div class="progress progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="progress-bar progress-bar-success" style="width:0%;"></div></div>
+		</td>
+		<td>
+			{% if (!i && !o.options.autoUpload) { %}
+				<button class="btn btn-primary start" disabled>
+					<i class="glyphicon glyphicon-upload"></i>
+					<span>Start</span>
+				</button>
+			{% } %}
+			{% if (!i) { %}
+				<button class="btn btn-warning cancel">
+					<i class="glyphicon glyphicon-ban-circle"></i>
+					<span>Cancel</span>
+				</button>
+			{% } %}
+		</td>
+	</tr>
+{% } %}
+</script>
+<!-- The template to display files available for download -->
+<script id="template-download" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+	<tr class="template-download fade">
+		<td>
+			<span class="preview">
+				{% if (file.thumbnailUrl) { %}
+					<a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" data-gallery><img src="{%=file.thumbnailUrl%}"></a>
+				{% } %}
+			</span>
+		</td>
+		<td>
+			<p class="name" id="tmp_file_id" data-file-id="{%=file.tmp_file_id%}">
+				{% if (file.url) { %}
+					<a href="{%=file.url%}" title="{%=file.name%}" download="{%=file.name%}" {%=file.thumbnailUrl?'data-gallery':''%}>{%=file.name%}</a>
+				{% } else { %}
+					<span>{%=file.name%}</span>
+				{% } %}
+			</p>
+			{% if (file.error) { %}
+				<div><span class="label label-danger">Error</span> {%=file.error%}</div>
+			{% } %}
+		</td>
+		<td>
+			<span class="size">{%=o.formatFileSize(file.size)%}</span>
+		</td>
+		<td>
+			{% if (file.deleteUrl) { %}
+				<button class="btn btn-danger delete" data-type="{%=file.deleteType%}" data-url="{%=file.deleteUrl%}"{% if (file.deleteWithCredentials) { %} data-xhr-fields='{"withCredentials":true}'{% } %}>
+					<i class="glyphicon glyphicon-trash"></i>
+					<span>Delete</span>
+				</button>
+				<input type="checkbox" name="delete" value="1" class="toggle">
+			{% } else { %}
+				<button class="btn btn-warning cancel">
+					<i class="glyphicon glyphicon-ban-circle"></i>
+					<span>Cancel</span>
+				</button>
+				
+			{% } %}
+		</td>
+	</tr>
+{% } %}
+</script>
+<!-- <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script> -->
+<!-- The jQuery UI widget factory, can be omitted if jQuery UI is already included -->
+<script src="/uploadplugin/js/vendor/jquery.ui.widget.js"></script>
+<!-- The Templates plugin is included to render the upload/download listings -->
+<script src="//blueimp.github.io/JavaScript-Templates/js/tmpl.min.js"></script>
+<!-- The Load Image plugin is included for the preview images and image resizing functionality -->
+<script src="//blueimp.github.io/JavaScript-Load-Image/js/load-image.all.min.js"></script>
+<!-- The Canvas to Blob plugin is included for image resizing functionality -->
+<script src="//blueimp.github.io/JavaScript-Canvas-to-Blob/js/canvas-to-blob.min.js"></script>
+<!-- Bootstrap JS is not required, but included for the responsive demo navigation -->
+<script src="//netdna.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+<!-- blueimp Gallery script -->
+<script src="//blueimp.github.io/Gallery/js/jquery.blueimp-gallery.min.js"></script>
+<!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
+<script src="/uploadplugin/js/jquery.iframe-transport.js"></script>
+<!-- The basic File Upload plugin -->
+<script src="/uploadplugin/js/jquery.fileupload.js"></script>
+<!-- The File Upload processing plugin -->
+<script src="/uploadplugin/js/jquery.fileupload-process.js"></script>
+<!-- The File Upload image preview & resize plugin -->
+<script src="/uploadplugin/js/jquery.fileupload-image.js"></script>
+<!-- The File Upload audio preview plugin -->
+<script src="/uploadplugin/js/jquery.fileupload-audio.js"></script>
+<!-- The File Upload video preview plugin -->
+<script src="/uploadplugin/js/jquery.fileupload-video.js"></script>
+<!-- The File Upload validation plugin -->
+<script src="/uploadplugin/js/jquery.fileupload-validate.js"></script>
+<!-- The File Upload user interface plugin -->
+<script src="/uploadplugin/js/jquery.fileupload-ui.js"></script>
+<!-- The main application script -->
+<!-- <script src="/uploadplugin/js/main.js"></script> -->
+
+<!-- The XDomainRequest Transport is included for cross-domain file deletion for IE 8 and IE 9 -->
+<!--[if (gte IE 8)&(lt IE 10)]>
+<script src="/uploadplugin/js/cors/jquery.xdr-transport.js"></script>
+<![endif]-->
+<script>
+
+$(function () {
+	 $('#fileupload').fileupload({
+			// Uncomment the following to send cross-domain cookies:
+			//xhrFields: {withCredentials: true},
+			url: '<c:url value="/_admin/ipsu/ajaxRegistFile2.adm"/>'
+			,acceptFileTypes: /(\.|\/)(mp4|mxf?g|mxf)$/i
+			,maxChunkSize: 200000000 // 10 MB
+			,add: function (e, data) {
+				var that = this;
+				$.post('<c:url value="/_admin/ipsu/checkChunkFile.adm"'/>, {file: data.files[0].name}, function (result) {
+					var file = result.file;
+					data.uploadedBytes = file && file.size;
+					$.blueimp.fileupload.prototype
+						.options.add.call(that, e, data);
+				});
+			}
+		}).bind('fileuploaddone', function (e, data){
+			var result = data.result;
+			$('#org_file_name').val(result.files[0].name);
+			$('#fileupload').fileupload('disable');
+		/*	ajaxTransFilePool();
+			clearInterval(handle);
+			handle = null;*/
+		}).bind('fileuploadstart', function (e, data){
+			/*if(handle == null){
+				handle = setInterval("ajaxTransFilePool()", 1000); //
+			}*/
+			
+		});
+});
+
+
+function ajaxCallApi(){
+	$.ajax({
+		url:'/_admin/ipsu/ajaxCallApi.adm'
+		,data:"svc_seq=1"
+		,type:'post'
+		,dataType : 'json'
+		,success:function(data){	
+			var obj  = jQuery.parseJSON(data);
+			var vodInfo = obj.vodInfo;
+			$('form input[name=production_code]').val(vodInfo.production_code);
+			$('form input[name=content_name]').val(vodInfo.content_name);
+			$('form input[name=production_name]').val(vodInfo.production_name);
+			$('form input[name=product_code]').val(vodInfo.product_code);
+			$('form input[name=band_width]').val(vodInfo.band_width);
+			$('form select[name=resolution]').val(vodInfo.resolution);
+			$('form input[name=play_time]').val(vodInfo.play_time);
+			$('form select[name=video_codec]').val(vodInfo.video_codec);
+			$('form input[name=file_size]').val(vodInfo.file_size);
+			$('form select[name=audio_codec]').val(vodInfo.audio_codec);
+			$('form input[name=use_start_date]').val(vodInfo.use_start_date);
+			$('form input[name=use_end_date]').val(vodInfo.use_end_date);
+			$('form select[name=file_type]').val(vodInfo.file_type);
+			$('form input[name=use_yn]').each(function(){
+				if($(this).val() == vodInfo.use_yn){
+					$(this).attr('checked' ,true);
+				}
+			});
+			$('form input[name=test_yn]').each(function(){
+				if($(this).val() == vodInfo.test_yn){
+					$(this).attr('checked' ,true);
+				}
+			});
+			$('form input[name=del_yn]').each(function(){
+				if($(this).val() == vodInfo.del_yn){
+					$(this).attr('checked' ,true);
+				}
+			});
+		}
+		,error:function(){
+		}
+		, complete:function(){
+			FnPageLoadding(false);					
+		}
+	});
+}
+
+function goInsert(){		
+	var frm	=	document.form1;
+	var fu = new FormUtil(frm);
+	if( fu.success() ){
+		var org_file_name = $("#org_file_name").val(); 
+		var sample_org_file_name = $("#sample_org_file_name").val(); 
+		if( sample_org_file_name != "" &&  org_file_name == sample_org_file_name ){
+			alert("경로 및 입수 파일명과 Sample 경로 및 입수 파일명이 동일할 수 없습니다.");
+			return;
+		}
+		
+		var pc = $("#product_code").val();
+		if( pc.length > 0 && pc.length !=8 ){
+			alert("상품코드를 입력시에는 8자로만 입력가능합니다"); $("#product_code").focus(); return;
+			
+		}
+		
+		if( $("#use_start_date").val() > $("#use_end_date").val() ){
+			alert("유효 종료일을 유효 시작일 전으로 선택 할 수 없습니다."); $("#use_end_date").focus(); return;
+		}
+		
+		if( confirm("등록 하시겠습니까?")){
+			frm.action = '/_admin/ipsu/insertProc.adm';
+
+			$("#form1").ajaxForm({
+
+				dataType : 'json'
+				,type:"POST"
+				,success:function(result){
+					var data = jQuery.parseJSON(result);
+					alert(data.resultMsg);
+					
+					if( data.result == "true" ){
+						
+						$("#cid").val(data.cid);
+						
+						/* var frm = document.form1;
+						frm.action = proc_path;
+						frm.submit(); */
+						
+						
+					}else if( data.result == "false" && data.resultCursor != "" ){
+						$("#"+data.resultCursor).focus();
+					}
+						
+				}
+				,error:function(){
+					alert(data.resultMsg);
+				}
+			});
+			$("#form1").submit();
+			
+		}
+	} 
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Context >
+	<Resource name="jdbc/ai" auth="Container" type="javax.sql.DataSource"
+               maxTotal="100" maxIdle="30" maxWaitMillis="10000"
+               username="aircode_ai" password="aircode_ai1#" driverClassName="net.sf.log4jdbc.sql.jdbcapi.DriverSpy"
+               url="jdbc:log4jdbc:oracle:thin:@203.227.22.66:1521:xe"/>
+</Context>
